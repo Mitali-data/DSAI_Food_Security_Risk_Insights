@@ -1,0 +1,216 @@
+
+========================================================================
+1. DATA + MISSINGNESS AUDIT
+========================================================================
+178 countries scored, year 2021
+39 countries EXCLUDED for <60% indicator coverage.
+
+>> THE EXCLUSION LIST IS BIMODAL, AND THIS IS THE HEADLINE FINDING.
+   Data is missing for two OPPOSITE reasons, and the gate cannot tell
+   them apart:
+     (a) micro-territories nobody BOTHERS to measure (Monaco, Cayman,
+         Aruba, Gibraltar) -- harmless to drop, genuinely low risk.
+     (b) collapsed states nobody CAN measure -- Somalia, Eritrea,
+         DPR Korea, West Bank & Gaza. These are among the most
+         food-insecure places on earth AND THEY GET NO SCORE.
+
+   A risk index that is silent precisely where risk is greatest is not
+   a neutral gap. Any user must be told this explicitly, or the
+   absence of a country from the priority list reads as safety.
+
+   Excluded countries in food-insecure regions (9):
+             country_name                                            region  coverage
+ Northern Mariana Islands                               East Asia & Pacific      0.09
+                     Guam                               East Asia & Pacific      0.18
+           American Samoa                               East Asia & Pacific      0.27
+       West Bank and Gaza Middle East, North Africa, Afghanistan & Pakistan      0.45
+                    Palau                               East Asia & Pacific      0.45
+                 Viet Nam                               East Asia & Pacific      0.45
+                    Nauru                               East Asia & Pacific      0.55
+Korea, Dem. People's Rep.                               East Asia & Pacific      0.55
+    Micronesia, Fed. Sts.                               East Asia & Pacific      0.55
+
+                      indicator  pct_missing  undernourishment_when_present  undernourishment_when_missing  mnar_gap
+             gdp_per_capita_usd          3.2                           10.7                           37.4      26.7
+  inflation_consumer_prices_pct         16.6                           10.3                           19.1       8.9
+fao_dietary_energy_adequacy_pct         29.5                           10.5                           17.6       7.1
+   fao_animal_protein_g_per_day         31.8                           10.6                           12.5       2.0
+       fao_basic_sanitation_pct         18.7                           10.6                           12.6       2.0
+   fao_protein_supply_g_per_day         31.8                           10.6                           12.5       2.0
+
+>> MNAR WARNING: 3 indicator(s) are missing disproportionately in high-undernourishment countries.
+>> Imputation therefore biases the score DOWNWARD exactly where risk is highest. -> limitations section.
+
+========================================================================
+2. COMPOSITE RISK SCORE (two weighting schemes)
+========================================================================
+PC1 explains 66.4% of indicator variance
+
+Top PCA weights:
+child_mortality_per_1000        0.102
+fao_animal_protein_g_per_day    0.102
+fao_basic_sanitation_pct        0.101
+fao_child_stunting_pct          0.101
+fao_protein_supply_g_per_day    0.101
+
+>> ROBUSTNESS: Spearman(equal-weight, PCA-weight) = 0.989  (p=1.5e-148)
+>> Top-10 overlap between the two schemes: 7/10
+
+Highest-risk countries:
+ rank             country_name                     region    score risk_band  n_imputed
+    1         Congo, Dem. Rep.        Sub-Saharan Africa  0.931947    Severe          1
+    2 Central African Republic        Sub-Saharan Africa  0.909553    Severe          0
+    3               Madagascar        Sub-Saharan Africa  0.899391    Severe          0
+    4                   Angola        Sub-Saharan Africa  0.894291    Severe          0
+    5               Mozambique        Sub-Saharan Africa  0.892593    Severe          0
+    6              South Sudan        Sub-Saharan Africa  0.876328    Severe          1
+    7                   Zambia        Sub-Saharan Africa  0.867980    Severe          0
+    8                  Burundi        Sub-Saharan Africa  0.863933    Severe          1
+    9                    Haiti Latin America & Caribbean  0.857850    Severe          0
+   10             Sierra Leone        Sub-Saharan Africa  0.855967    Severe          0
+
+========================================================================
+3. RISK SEGMENTATION
+========================================================================
+-- (a) LEVEL clustering: how bad is it? --
+ k  silhouette  inertia
+ 2       0.423    980.8
+ 3       0.305    733.2
+ 4       0.250    631.5
+ 5       0.241    575.6
+ 6       0.208    525.0
+ 7       0.210    489.5
+ 8       0.213    447.9
+
+Unconstrained silhouette optimum: k=2 (a trivial high/low split).
+Selected k=3 (best silhouette with k>=3), so that segments can distinguish DRIVERS of risk, not just its level.
+silhouette=0.305  ARI vs Ward=0.429
+  [0] n=41  Severe risk - Utilisation & Availability-driven
+  [1] n=66  Low risk - no dominant driver
+  [2] n=71  Moderate risk - Access-driven
+Pillar profile (z, + = worse):
+         availability  access  utilisation
+cluster                                   
+0                1.17    1.12         1.56
+1               -0.94   -0.98        -0.91
+2                0.20    0.26        -0.05
+
+Within-cluster pillar spread (max - min z): {0: 0.44, 1: 0.06, 2: 0.31}
+>> Profiles are FLAT: every pillar elevated together. Level clustering recovered severity only, and cannot tell you what to DO.
+
+-- (b) SHAPE clustering: what KIND of failure is it? --
+ k  silhouette
+ 2       0.350
+ 3       0.384
+ 4       0.376
+ 5       0.352
+ 6       0.358
+ 7       0.375
+ 8       0.370
+
+k=3, silhouette=0.384, ARI vs Ward=0.560
+
+Segments (severity removed -- these are BOTTLENECKS):
+  [0] n=57  avg severity 0.44  |  Availability-bottlenecked cohort (+0.22), relatively strong on utilisation (-0.13)
+  [1] n=64  avg severity 0.52  |  Balanced cohort - no dominant bottleneck
+  [2] n=57  avg severity 0.39  |  Access-bottlenecked cohort (+0.11), relatively strong on utilisation (-0.19)
+
+Pillar composition (deviation from the country's OWN mean risk):
+         availability  access  utilisation
+cluster                                   
+0               0.223  -0.089       -0.134
+1               0.015  -0.004       -0.011
+2               0.075   0.112       -0.187
+
+Segment x region:
+region   East Asia & Pacific  Europe & Central Asia  Latin America & Caribbean   Middle East, North Africa, Afghanistan & Pakistan  North America  South Asia  Sub-Saharan Africa 
+cluster                                                                                                                                                                           
+0                         11                     11                          13                                                  7              1           1                   13
+1                         11                      8                           3                                                 10              1           3                   28
+2                          7                     26                          15                                                  5              0           2                    2
+
+========================================================================
+4. VALIDATION
+========================================================================
+0) DIRECTION SANITY CHECK (does each indicator alone point the right way?)
+                      indicator       pillar  assumed_direction  auc_alone VERDICT
+  inflation_consumer_prices_pct       access                  1      0.600      ok
+         cereal_yield_kg_per_ha availability                 -1      0.806      ok
+         fao_child_stunting_pct  utilisation                  1      0.881      ok
+   fao_animal_protein_g_per_day  utilisation                 -1      0.882      ok
+       child_mortality_per_1000  utilisation                  1      0.888      ok
+  employment_in_agriculture_pct       access                  1      0.899      ok
+       fao_basic_sanitation_pct  utilisation                 -1      0.906      ok
+             gdp_per_capita_usd       access                 -1      0.920      ok
+     fao_basic_water_access_pct  utilisation                 -1      0.922      ok
+   fao_protein_supply_g_per_day  utilisation                 -1      0.929      ok
+fao_dietary_energy_adequacy_pct availability                 -1      0.988      ok
+   All indicators point the assumed way. (Four did not, and were removed:
+    see config.STABILITY_PILLAR_POSTMORTEM.)
+
+a) HELD-OUT SUPERVISED TEST vs food_crisis_flag
+   The flag == (undernourishment >= 25%). The undernourishment family
+   is excluded from the score, so this is NOT circular.
+   n=178, crisis countries=15 (base rate 8.4%)
+   ROC-AUC          = 0.945   (equal 0.946 | PCA 0.936)
+   Avg precision    = 0.601
+   Top-10: precision 0.60  recall 0.40
+   Top-20: precision 0.50  recall 0.67
+   Top-30: precision 0.43  recall 0.87
+   >> A model that predicts 'no crisis' for everyone scores 91.6% ACCURACY and is useless.
+   >> Never report accuracy on a 8% base rate.
+   Per-pillar AUC (which pillar carries the signal alone?):
+      availability  0.962
+      access        0.870
+      utilisation   0.928
+
+b) BOOTSTRAP (200 resamples)
+   45 countries flagged High/Severe; 12 of them appear in the top quintile <75% of the time:
+         country_name  top_quintile_frequency
+      Solomon Islands                   0.689
+          Gambia, The                   0.652
+             Cameroon                   0.603
+              Comoros                   0.578
+             Pakistan                   0.504
+             Eswatini                   0.376
+              Namibia                   0.352
+Sao Tome and Principe                   0.254
+                India                   0.194
+                Ghana                   0.136
+              Lao PDR                   0.090
+              Vanuatu                   0.073
+   -> these are the flags you should NOT act on without more data.
+
+c) LEAVE-ONE-INDICATOR-OUT (churn in top-10)
+              dropped_indicator  top10_retained  churn
+fao_dietary_energy_adequacy_pct               7      3
+   fao_protein_supply_g_per_day               7      3
+  inflation_consumer_prices_pct               7      3
+             gdp_per_capita_usd               9      1
+   -> most influential single indicator: fao_dietary_energy_adequacy_pct (dropping it changes 3/10 of the top list)
+
+========================================================================
+5. DECISION-SUPPORT OUTPUT (sample)
+========================================================================
+**Congo, Dem. Rep.** (Sub-Saharan Africa, 2021)
+
+**Severity** — risk score 0.93, rank 1 of 178, band **Severe**.
+
+Pillar scores (0–1, higher = worse): availability 1.00, access 0.74, utilisation 0.99
+
+**Bottleneck — availability.** Relative to this country's own average risk (0.91), availability is its weakest pillar (+0.09) and access its relatively strongest (-0.17).
+
+**Indicated response:** supply-side support (production inputs, strategic reserves)
+
+Indicators furthest above the global average:
+- basic water access (+0.77 risk units, utilisation)
+- basic sanitation (+0.74 risk units, utilisation)
+- child stunting (+0.68 risk units, utilisation)
+
+**Cohort:** Balanced cohort - no dominant bottleneck
+_(This describes the cohort's average shape, not necessarily this country's. Trust the bottleneck line above for this country.)_
+
+⚠️ **1 of 11 indicators were imputed** from the regional median. This score is less reliable than it looks.
+
+
+Artefacts written to /home/claude/fsnri/outputs/

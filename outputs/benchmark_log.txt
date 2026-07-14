@@ -1,0 +1,45 @@
+panel: 4203 country-years, 184 countries, 405 crisis rows (base rate 9.6%)
+
+==========================================================================
+TRAP #4  --  we missed a near-copy of the label
+==========================================================================
+  corr(fao_dietary_energy_adequacy_pct, undernourishment) = -0.835
+  AUC of that ONE column alone vs the flag  = 0.989
+  -> higher than our entire 11-indicator index.
+  -> FAO DERIVES undernourishment FROM dietary energy supply. Same measurement.
+  -> Our quarantine missed it. It hides upstream in FAO's own derivation chain.
+
+==========================================================================
+(A) WITH fao_dietary_energy_adequacy_pct  (11 indicators)   << OPTIMISTIC
+==========================================================================
+                      model   auc    sd    ap
+   OUR INDEX (never fitted) 0.930 0.044   NaN
+   Logistic regression (L2) 0.992 0.002 0.931
+Logistic regression (Lasso) 0.992 0.002 0.939
+              Random Forest 0.985 0.003 0.873
+
+==========================================================================
+(B) WITHOUT it  (10 indicators)   << OUR HONEST ESTIMATE
+==========================================================================
+                      model   auc    sd    ap
+   OUR INDEX (never fitted) 0.880 0.080   NaN
+   Logistic regression (L2) 0.909 0.070 0.592
+Logistic regression (Lasso) 0.910 0.066 0.592
+              Random Forest 0.888 0.059 0.421
+
+==========================================================================
+WHAT THIS MEANS
+==========================================================================
+  With the near-copy in:   a fitted classifier beats our index by +0.062 AUC.
+  With it removed:         the gap collapses to +0.029.
+
+  So the classifier's apparent superiority was mostly it discovering the
+  near-copy and dumping all its weight on it. Once that is gone, a model that
+  is ALLOWED TO FIT beats our fixed, transparent, never-fitted formula by
+  about 0.03 AUC.
+
+  That is the honest verdict on our index: it captures nearly all the
+  available signal, and it does so with a formula you can read.
+
+  And our headline AUC of 0.945 is OPTIMISTIC. The number we should be
+  quoting is ~0.88.

@@ -1,0 +1,12 @@
+indicator,pillar,assumed_direction,auc_alone,VERDICT
+inflation_consumer_prices_pct,access,1,0.6,ok
+cereal_yield_kg_per_ha,availability,-1,0.806,ok
+fao_child_stunting_pct,utilisation,1,0.881,ok
+fao_animal_protein_g_per_day,utilisation,-1,0.882,ok
+child_mortality_per_1000,utilisation,1,0.888,ok
+employment_in_agriculture_pct,access,1,0.899,ok
+fao_basic_sanitation_pct,utilisation,-1,0.906,ok
+gdp_per_capita_usd,access,-1,0.92,ok
+fao_basic_water_access_pct,utilisation,-1,0.922,ok
+fao_protein_supply_g_per_day,utilisation,-1,0.929,ok
+fao_dietary_energy_adequacy_pct,availability,-1,0.988,ok

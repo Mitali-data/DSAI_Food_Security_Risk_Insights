@@ -1,0 +1,12 @@
+indicator,pct_missing,undernourishment_when_present,undernourishment_when_missing,mnar_gap
+gdp_per_capita_usd,3.2,10.7,37.4,26.7
+inflation_consumer_prices_pct,16.6,10.3,19.1,8.9
+fao_dietary_energy_adequacy_pct,29.5,10.5,17.6,7.1
+fao_animal_protein_g_per_day,31.8,10.6,12.5,2.0
+fao_basic_sanitation_pct,18.7,10.6,12.6,2.0
+fao_protein_supply_g_per_day,31.8,10.6,12.5,2.0
+fao_basic_water_access_pct,18.9,10.7,11.9,1.2
+child_mortality_per_1000,9.7,10.9,6.6,-4.3
+fao_child_stunting_pct,30.0,11.9,6.8,-5.1
+cereal_yield_kg_per_ha,17.9,11.1,5.2,-5.9
+employment_in_agriculture_pct,13.9,11.0,4.1,-6.9
